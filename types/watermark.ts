@@ -7,6 +7,7 @@ export type LayoutPreset =
 
 export interface WatermarkSettings {
   mode: WatermarkMode;
+  watermarkImageSrc?: string;
   xPercent: number;
   yPercent: number;
   widthPercent: number;
@@ -14,15 +15,14 @@ export interface WatermarkSettings {
   opacity: number;
   blendMode: GlobalCompositeOperation;
   repeat: boolean;
-  lockAspectRatio: boolean;
-  flipHorizontal: boolean;
-  flipVertical: boolean;
-  shadowEnabled: boolean;
+  flipX: boolean;
+  flipY: boolean;
+  shadow: boolean;
   shadowColor: string;
   shadowBlur: number;
   shadowOffsetX: number;
   shadowOffsetY: number;
-  strokeEnabled: boolean;
+  stroke: boolean;
   strokeColor: string;
   strokeWidth: number;
   grayscale: number;
