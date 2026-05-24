@@ -1,14 +1,17 @@
 import { describe, expect, it } from 'vitest';
-import { getExportFilename, isValidSourceImageType } from '@/lib/file-utils';
+import { getExportFilename, isValidSourceImageType, isValidWatermarkImageType } from '@/lib/file-utils';
 
 describe('file utils', () => {
-  it('detects invalid file type', () => {
-    const file = new File(['x'], 'x.gif', { type: 'image/gif' });
-    expect(isValidSourceImageType(file)).toBe(false);
+  it('validates source types', () => {
+    expect(isValidSourceImageType(new File(['x'], 'a.jpg', { type: 'image/jpeg' }))).toBe(true);
+    expect(isValidSourceImageType(new File(['x'], 'a.gif', { type: 'image/gif' }))).toBe(false);
   });
 
-  it('builds export filename', () => {
-    const name = getExportFilename(new Date('2026-05-24T12:00:00.000Z'));
-    expect(name).toBe('nowhere-mark-2026-05-24T12-00-00-000Z.png');
+  it('validates watermark types', () => {
+    expect(isValidWatermarkImageType(new File(['x'], 'a.svg', { type: 'image/svg+xml' }))).toBe(true);
+  });
+
+  it('formats export filename', () => {
+    expect(getExportFilename(new Date('2026-05-24T12:00:00.000Z'))).toBe('nowhere-mark-2026-05-24T12-00-00-000Z.png');
   });
 });
