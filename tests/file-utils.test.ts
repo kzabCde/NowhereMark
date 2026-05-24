@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { getExportFilename, isValidSourceImageType } from '@/lib/file-utils';
+import { getExportFilename, isValidSourceImageType } from '../lib/file-utils';
 
 describe('file utils', () => {
   it('detects invalid file type', () => {

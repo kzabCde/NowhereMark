@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { getWatermarkPosition } from '@/lib/watermark-position';
+import { getWatermarkPosition } from '../lib/watermark-position';
 
 const base = [1000, 800, 200, 100, 20] as const;
 

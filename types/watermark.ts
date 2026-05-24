@@ -39,3 +39,11 @@ export type WatermarkSettings = {
   rotation: number;
   color: string;
 };
+
+export type WatermarkTransform = {
+  xPercent: number;
+  yPercent: number;
+  widthPercent: number;
+  rotation: number;
+  opacity: number;
+};
