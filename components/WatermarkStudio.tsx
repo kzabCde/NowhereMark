@@ -45,7 +45,7 @@ export function WatermarkStudio() {
   return <main className='mx-auto max-w-6xl p-4 md:p-8'>
     <h1 className='text-2xl font-semibold'>Nowhere Mark</h1><p className='mb-4 text-sm text-slate-600 dark:text-slate-400'>Add your mark. Protect your image.</p>
     <div className='grid gap-4 lg:grid-cols-[1.5fr_1fr]'>
-      <div className='space-y-4'><ImageUploader onFile={setSourceFile} error={sourceError} setError={setSourceError} /><WatermarkPreview originalSrc={sourceUrl} watermarkedSrc={result} /></div>
+      <div className='space-y-4'><ImageUploader onFile={setSourceFile} error={sourceError} setError={setSourceError} /><WatermarkPreview originalSrc={sourceUrl ?? undefined} watermarkedSrc={result ?? undefined} /></div>
       <div className='space-y-4'><WatermarkControls mode={mode} setMode={setMode} text={textSettings} setText={setTextSettings} image={imageSettings} setImage={setImageSettings} imageError={watermarkError} onImageWatermark={(file)=>{ if(!file) return; if(!isValidWatermarkImageType(file)){setWatermarkError('Unsupported watermark file. Please use PNG, SVG, or WebP.'); return;} setWatermarkError(null); setWatermarkFile(file); }} /><DownloadButton disabled={!result} onDownload={()=>{ if(!result) return; const a=document.createElement('a'); a.href=result; a.download=getExportFilename(); a.click(); }} /><PrivacyNotice /></div>
     </div>
   </main>;
