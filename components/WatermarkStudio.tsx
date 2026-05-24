@@ -5,8 +5,8 @@ import { ImageUploader } from '@/components/ImageUploader';
 import { PrivacyNotice } from '@/components/PrivacyNotice';
 import { WatermarkControls } from '@/components/WatermarkControls';
 import { WatermarkPreview } from '@/components/WatermarkPreview';
+import { renderWatermarkedCanvas, loadImage } from '@/lib/canvas-watermark';
 import { getExportFilename, isValidWatermarkImageType } from '@/lib/file-utils';
-import { renderWatermarkedCanvas } from '@/lib/canvas-watermark';
 import type { ImageWatermarkSettings, TextWatermarkSettings, WatermarkMode } from '@/types/watermark';
 
 export function WatermarkStudio() {
@@ -27,14 +27,10 @@ export function WatermarkStudio() {
   useEffect(() => {
     async function render() {
       if (!sourceUrl) return setResult(null);
-      const sourceImage = new Image();
-      sourceImage.src = sourceUrl;
-      await sourceImage.decode();
+      const sourceImage = await loadImage(sourceUrl);
       let wmImage: HTMLImageElement | null = null;
       if (mode === 'image' && watermarkUrl) {
-        wmImage = new Image();
-        wmImage.src = watermarkUrl;
-        await wmImage.decode();
+        wmImage = await loadImage(watermarkUrl);
       }
       const canvas = await renderWatermarkedCanvas(sourceImage, mode, textSettings, imageSettings, wmImage);
       setResult(canvas.toDataURL('image/png'));
@@ -46,7 +42,7 @@ export function WatermarkStudio() {
     <h1 className='text-2xl font-semibold'>Nowhere Mark</h1><p className='mb-4 text-sm text-slate-600 dark:text-slate-400'>Add your mark. Protect your image.</p>
     <div className='grid gap-4 lg:grid-cols-[1.5fr_1fr]'>
       <div className='space-y-4'><ImageUploader onFile={setSourceFile} error={sourceError} setError={setSourceError} /><WatermarkPreview originalSrc={sourceUrl ?? undefined} watermarkedSrc={result ?? undefined} /></div>
-      <div className='space-y-4'><WatermarkControls mode={mode} setMode={setMode} text={textSettings} setText={setTextSettings} image={imageSettings} setImage={setImageSettings} imageError={watermarkError} onImageWatermark={(file)=>{ if(!file) return; if(!isValidWatermarkImageType(file)){setWatermarkError('Unsupported watermark file. Please use PNG, SVG, or WebP.'); return;} setWatermarkError(null); setWatermarkFile(file); }} /><DownloadButton disabled={!result} onDownload={()=>{ if(!result) return; const a=document.createElement('a'); a.href=result; a.download=getExportFilename(); a.click(); }} /><PrivacyNotice /></div>
+      <div className='space-y-4'><WatermarkControls mode={mode} setMode={setMode} text={textSettings} setText={setTextSettings} image={imageSettings} setImage={setImageSettings} imageError={watermarkError} watermarkPreviewSrc={watermarkUrl ?? undefined} onImageWatermark={(file)=>{ if(!file) return; if(!isValidWatermarkImageType(file)){setWatermarkError('Unsupported watermark file. Please use PNG, JPG, JPEG, SVG, or WebP.'); return;} setWatermarkError(null); setWatermarkFile(file); }} /><DownloadButton disabled={!result} onDownload={()=>{ if(!result) return; const a=document.createElement('a'); a.href=result; a.download=getExportFilename(); a.click(); }} /><PrivacyNotice /></div>
     </div>
   </main>;
 }

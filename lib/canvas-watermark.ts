@@ -10,11 +10,12 @@ function drawRotated(ctx: CanvasRenderingContext2D, x: number, y: number, w: num
   ctx.restore();
 }
 
-function ensureImageLoaded(image: HTMLImageElement): Promise<void> {
-  if (image.complete && image.naturalWidth > 0) return Promise.resolve();
+export function loadImage(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
-    image.onload = () => resolve();
-    image.onerror = () => reject(new Error('Failed to load watermark image.'));
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(new Error(`Failed to load image: ${src}`));
+    image.src = src;
   });
 }
 
@@ -31,7 +32,6 @@ export async function renderWatermarkedCanvas(
   const ctx = canvas.getContext('2d');
   if (!ctx) return canvas;
 
-  // Always draw source first so watermark remains visible.
   ctx.drawImage(sourceImage, 0, 0, canvas.width, canvas.height);
 
   if (mode === 'text') {
@@ -61,8 +61,6 @@ export async function renderWatermarkedCanvas(
   }
 
   if (mode === 'image' && watermarkImage) {
-    await ensureImageLoaded(watermarkImage);
-
     const opacity = Math.max(imageSettings.opacity || 0.85, 0.8);
     const baseWidth = canvas.width * (imageSettings.sizePercent / 100);
     const ratio = watermarkImage.naturalHeight / watermarkImage.naturalWidth;

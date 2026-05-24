@@ -27,3 +27,15 @@ export interface TextWatermarkSettings extends BaseWatermarkSettings {
 export interface ImageWatermarkSettings extends BaseWatermarkSettings {
   sizePercent: number;
 }
+
+export type WatermarkSettings = {
+  mode: WatermarkMode;
+  text: string;
+  imageSrc?: string;
+  position: WatermarkPosition;
+  opacity: number;
+  size: number;
+  margin: number;
+  rotation: number;
+  color: string;
+};

@@ -1,5 +1,5 @@
 const SUPPORTED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
-const SUPPORTED_WATERMARK_TYPES = ['image/png', 'image/webp', 'image/svg+xml'];
+const SUPPORTED_WATERMARK_TYPES = ['image/png', 'image/jpeg', 'image/webp', 'image/svg+xml'];
 
 export function isValidSourceImageType(file: File): boolean {
   return SUPPORTED_IMAGE_TYPES.includes(file.type);
