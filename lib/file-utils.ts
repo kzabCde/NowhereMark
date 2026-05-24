@@ -1,15 +1,15 @@
-const SUPPORTED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
-const SUPPORTED_WATERMARK_TYPES = ['image/png', 'image/webp', 'image/svg+xml'];
+const SOURCE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+const WATERMARK_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml'];
 
-export function isValidSourceImageType(file: File): boolean {
-  return SUPPORTED_IMAGE_TYPES.includes(file.type);
-}
+export const isValidSourceImageType = (file: File) => SOURCE_TYPES.includes(file.type);
+export const isValidWatermarkImageType = (file: File) => WATERMARK_TYPES.includes(file.type);
+export const getExportFilename = (now = new Date()) => `nowhere-mark-${now.toISOString().replace(/[:.]/g, '-')}.png`;
 
-export function isValidWatermarkImageType(file: File): boolean {
-  return SUPPORTED_WATERMARK_TYPES.includes(file.type);
-}
-
-export function getExportFilename(now = new Date()): string {
-  const stamp = now.toISOString().replace(/[:.]/g, '-');
-  return `nowhere-mark-${stamp}.png`;
+export async function loadHtmlImage(file: File): Promise<HTMLImageElement> {
+  const url = URL.createObjectURL(file);
+  const img = new Image();
+  img.src = url;
+  await img.decode();
+  URL.revokeObjectURL(url);
+  return img;
 }
