@@ -5,7 +5,7 @@ import { ImageUploader } from '@/components/ImageUploader';
 import { PrivacyNotice } from '@/components/PrivacyNotice';
 import { WatermarkControls } from '@/components/WatermarkControls';
 import { WatermarkPreview } from '@/components/WatermarkPreview';
-import { renderWatermarkedCanvas, loadImage } from '@/lib/canvas-watermark';
+import { renderWatermarkedImage } from '@/lib/canvas-watermark';
 import { getExportFilename, isValidWatermarkImageType } from '@/lib/file-utils';
 import { clampTransform, presetToTransform } from '@/lib/watermark-transform';
 import type { ImageWatermarkSettings, TextWatermarkSettings, WatermarkMode, WatermarkPosition, WatermarkTransform } from '@/types/watermark';
@@ -32,10 +32,19 @@ export function WatermarkStudio() {
   useEffect(() => {
     async function render() {
       if (!sourceUrl) return setResult(null);
-      const sourceImage = await loadImage(sourceUrl);
-      const wmImage = mode === 'image' && watermarkUrl ? await loadImage(watermarkUrl) : null;
-      const canvas = await renderWatermarkedCanvas(sourceImage, mode, textSettings, imageSettings, wmImage, transform);
-      setResult(canvas.toDataURL('image/png'));
+      const settings = {
+        mode,
+        text: textSettings.text,
+        imageSrc: watermarkUrl ?? undefined,
+        xPercent: transform.xPercent,
+        yPercent: transform.yPercent,
+        widthPercent: transform.widthPercent,
+        rotation: transform.rotation,
+        opacity: transform.opacity,
+        color: textSettings.color
+      };
+      const png = await renderWatermarkedImage({ imageSrc: sourceUrl, settings });
+      setResult(png);
     }
     void render();
   }, [sourceUrl, watermarkUrl, mode, textSettings, imageSettings, transform]);
