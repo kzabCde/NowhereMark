@@ -36,7 +36,7 @@ export function WatermarkStudio() {
         wmImage.src = watermarkUrl;
         await wmImage.decode();
       }
-      const canvas = renderWatermarkedCanvas(sourceImage, mode, textSettings, imageSettings, wmImage);
+      const canvas = await renderWatermarkedCanvas(sourceImage, mode, textSettings, imageSettings, wmImage);
       setResult(canvas.toDataURL('image/png'));
     }
     void render();

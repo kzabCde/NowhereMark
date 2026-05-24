@@ -17,4 +17,9 @@ describe('getWatermarkPosition', () => {
   ])('returns %s', (position, expected) => {
     expect(getWatermarkPosition(position as never, ...base)).toEqual(expected);
   });
+
+  it('clamps positions within canvas bounds', () => {
+    expect(getWatermarkPosition('top-left', 100, 80, 120, 90, 24)).toEqual({ x: 0, y: 0 });
+    expect(getWatermarkPosition('bottom-right', 100, 80, 120, 90, 24)).toEqual({ x: 0, y: 0 });
+  });
 });
