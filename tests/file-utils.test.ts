@@ -12,6 +12,6 @@ describe('file utils', () => {
   });
 
   it('formats export filename', () => {
-    expect(getExportFilename(new Date('2026-05-24T12:00:00.000Z'))).toBe('nowhere-mark-2026-05-24T12-00-00-000Z.png');
+    expect(getExportFilename(undefined, new Date('2026-05-24T12:00:00.000Z'))).toBe('nowhere-mark-2026-05-24T12-00-00-000Z.png');
   });
 });

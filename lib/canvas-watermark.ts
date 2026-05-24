@@ -9,15 +9,36 @@ type RenderInput = {
   targetCanvas?: HTMLCanvasElement;
 };
 
+export type RenderWatermarkedImageInput = {
+  mainImageSrc: string;
+  watermarkSettings: WatermarkSettings;
+  watermarkImageSrc?: string;
+};
+
+function loadImage(src: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error(`Failed to load image: ${src}`));
+    img.src = src;
+  });
+}
+
 function applyEffects(ctx: CanvasRenderingContext2D, s: WatermarkSettings) {
-  const filters = [
-    `grayscale(${s.grayscale}%)`,
-    `brightness(${s.brightness}%)`,
-    `contrast(${s.contrast}%)`,
-    `invert(${s.invert}%)`,
-    `blur(${s.blur}px)`,
-  ];
-  ctx.filter = filters.join(' ');
+  ctx.filter = [`grayscale(${s.grayscale}%)`, `brightness(${s.brightness}%)`, `contrast(${s.contrast}%)`, `invert(${s.invert}%)`, `blur(${s.blur}px)`].join(' ');
+}
+
+export async function renderWatermarkedImage({ mainImageSrc, watermarkSettings, watermarkImageSrc }: RenderWatermarkedImageInput): Promise<string> {
+  const sourceImage = await loadImage(mainImageSrc);
+  const wm = watermarkImageSrc ? await loadImage(watermarkImageSrc) : null;
+  const canvas = renderWatermarkedCanvas({
+    sourceImage,
+    sourceWidth: sourceImage.naturalWidth,
+    sourceHeight: sourceImage.naturalHeight,
+    settings: watermarkSettings,
+    watermarkImage: wm,
+  });
+  return canvas.toDataURL('image/png');
 }
 
 export function renderWatermarkedCanvas({ sourceImage, sourceWidth, sourceHeight, settings, watermarkImage, targetCanvas }: RenderInput): HTMLCanvasElement {
@@ -34,7 +55,7 @@ export function renderWatermarkedCanvas({ sourceImage, sourceWidth, sourceHeight
   ctx.drawImage(sourceImage, 0, 0, canvas.width, canvas.height);
 
   const wmW = (settings.widthPercent / 100) * canvas.width;
-  const wmH = watermarkImage ? wmW * ((watermarkImage as HTMLImageElement).naturalHeight / (watermarkImage as HTMLImageElement).naturalWidth || 1) : settings.fontSize * 1.5;
+  const wmH = watermarkImage ? wmW * (((watermarkImage as HTMLImageElement).naturalHeight / (watermarkImage as HTMLImageElement).naturalWidth) || 1) : settings.fontSize * 1.5;
   const x = (settings.xPercent / 100) * canvas.width;
   const y = (settings.yPercent / 100) * canvas.height;
 
@@ -42,7 +63,7 @@ export function renderWatermarkedCanvas({ sourceImage, sourceWidth, sourceHeight
   ctx.globalAlpha = settings.opacity;
   ctx.globalCompositeOperation = settings.blendMode;
   applyEffects(ctx, settings);
-  if (settings.shadowEnabled) {
+  if (settings.shadow) {
     ctx.shadowColor = settings.shadowColor;
     ctx.shadowBlur = settings.shadowBlur;
     ctx.shadowOffsetX = settings.shadowOffsetX;
@@ -53,11 +74,11 @@ export function renderWatermarkedCanvas({ sourceImage, sourceWidth, sourceHeight
     ctx.save();
     ctx.translate(dx, dy);
     ctx.rotate((settings.rotation * Math.PI) / 180);
-    ctx.scale(settings.flipHorizontal ? -1 : 1, settings.flipVertical ? -1 : 1);
+    ctx.scale(settings.flipX ? -1 : 1, settings.flipY ? -1 : 1);
 
     if ((settings.mode === 'image' || settings.mode === 'hybrid') && watermarkImage) {
       ctx.drawImage(watermarkImage, -wmW / 2, -wmH / 2, wmW, wmH);
-      if (settings.strokeEnabled) {
+      if (settings.stroke) {
         ctx.strokeStyle = settings.strokeColor;
         ctx.lineWidth = settings.strokeWidth;
         ctx.strokeRect(-wmW / 2, -wmH / 2, wmW, wmH);
@@ -72,7 +93,7 @@ export function renderWatermarkedCanvas({ sourceImage, sourceWidth, sourceHeight
       let cx = 0;
       for (const ch of chars) {
         const w = ctx.measureText(ch).width;
-        if (settings.strokeEnabled) {
+        if (settings.stroke) {
           ctx.strokeStyle = settings.textStrokeColor;
           ctx.lineWidth = settings.strokeWidth;
           ctx.strokeText(ch, cx, 0);
