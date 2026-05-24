@@ -15,8 +15,8 @@ export function WatermarkStudio() {
   const [mode, setMode] = useState<WatermarkMode>('text');
   const [watermarkFile, setWatermarkFile] = useState<File | null>(null);
   const [watermarkError, setWatermarkError] = useState<string | null>(null);
-  const [textSettings, setTextSettings] = useState<TextWatermarkSettings>({ text: 'Nowhere Mark', fontSize: 48, color: '#ffffff', opacity: 0.8, margin: 24, rotation: -20, position: 'bottom-right' });
-  const [imageSettings, setImageSettings] = useState<ImageWatermarkSettings>({ sizePercent: 20, opacity: 0.8, margin: 24, rotation: 0, position: 'bottom-right' });
+  const [textSettings, setTextSettings] = useState<TextWatermarkSettings>({ text: 'Nowhere Mark', sizePercent: 4.5, color: '#ffffff', opacity: 0.9, marginPercent: 2, rotation: -20, position: 'bottom-right' });
+  const [imageSettings, setImageSettings] = useState<ImageWatermarkSettings>({ sizePercent: 22, opacity: 0.9, marginPercent: 2, rotation: 0, position: 'bottom-right' });
   const [result, setResult] = useState<string | null>(null);
 
   const sourceUrl = useMemo(() => (sourceFile ? URL.createObjectURL(sourceFile) : null), [sourceFile]);

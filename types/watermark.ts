@@ -13,14 +13,14 @@ export type WatermarkMode = 'text' | 'image';
 
 export interface BaseWatermarkSettings {
   opacity: number;
-  margin: number;
+  marginPercent: number;
   rotation: number;
   position: WatermarkPosition;
 }
 
 export interface TextWatermarkSettings extends BaseWatermarkSettings {
   text: string;
-  fontSize: number;
+  sizePercent: number;
   color: string;
 }
 

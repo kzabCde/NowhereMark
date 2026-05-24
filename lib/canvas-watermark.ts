@@ -37,15 +37,15 @@ export async function renderWatermarkedCanvas(
   if (mode === 'text') {
     const text = textSettings.text.trim() || 'Nowhere Mark';
     const color = textSettings.color || '#ffffff';
-    const opacity = Math.max(textSettings.opacity || 0.85, 0.8);
-    const proportionalFontSize = Math.round(Math.min(canvas.width, canvas.height) * 0.05);
-    const fontSize = Math.max(textSettings.fontSize || 0, 28, proportionalFontSize);
+    const opacity = Math.max(textSettings.opacity || 0.9, 0.9);
+    const fontSize = Math.max(24, canvas.width * (textSettings.sizePercent / 100));
 
     ctx.font = `${fontSize}px Inter, Arial, sans-serif`;
     const metrics = ctx.measureText(text);
     const textWidth = metrics.width;
     const textHeight = Math.max(fontSize, (metrics.actualBoundingBoxAscent || 0) + (metrics.actualBoundingBoxDescent || 0));
-    const pos = getWatermarkPosition(textSettings.position, canvas.width, canvas.height, textWidth, textHeight, textSettings.margin);
+    const textMargin = canvas.width * (textSettings.marginPercent / 100);
+    const pos = getWatermarkPosition(textSettings.position, canvas.width, canvas.height, textWidth, textHeight, textMargin);
 
     drawRotated(ctx, pos.x, pos.y, textWidth, textHeight, textSettings.rotation, () => {
       ctx.save();
@@ -61,12 +61,13 @@ export async function renderWatermarkedCanvas(
   }
 
   if (mode === 'image' && watermarkImage) {
-    const opacity = Math.max(imageSettings.opacity || 0.85, 0.8);
+    const opacity = Math.max(imageSettings.opacity || 0.9, 0.9);
     const baseWidth = canvas.width * (imageSettings.sizePercent / 100);
     const ratio = watermarkImage.naturalHeight / watermarkImage.naturalWidth;
-    const w = Math.max(24, baseWidth);
+    const w = Math.max(120, baseWidth);
     const h = w * ratio;
-    const pos = getWatermarkPosition(imageSettings.position, canvas.width, canvas.height, w, h, imageSettings.margin);
+    const imageMargin = canvas.width * (imageSettings.marginPercent / 100);
+    const pos = getWatermarkPosition(imageSettings.position, canvas.width, canvas.height, w, h, imageMargin);
 
     drawRotated(ctx, pos.x, pos.y, w, h, imageSettings.rotation, () => {
       ctx.save();
