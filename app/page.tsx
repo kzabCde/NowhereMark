@@ -76,19 +76,19 @@ export default function Page() {
 
   const canExport = useMemo(() => mainImages.some((m) => !!m.previewDataUrl), [mainImages]);
 
-  return <main className='mx-auto min-h-screen max-w-7xl bg-slate-50 p-4 md:p-8'>
+  return <main className='mx-auto min-h-screen max-w-7xl p-4 md:p-8'>
     <AppHeader />
     <div className='grid gap-4 lg:grid-cols-[360px_1fr]'>
       <section className='space-y-3'>
         <MainImagesUploader onFiles={onMainFiles} count={mainImages.length} remaining={MAX_MAIN_IMAGES - mainImages.length} />
         <WatermarkUploader onFiles={onWatermarkFiles} fileName={watermarkName} />
         <div className='flex gap-2'>
-          <button className='flex-1 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm' onClick={() => setMainImages([])}>Clear all images</button>
-          <button className='flex-1 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm' onClick={() => setSettings(initial)}>Reset settings</button>
+          <button className='flex-1 rounded-lg border border-slate-600 bg-slate-900 px-3 py-2 text-sm text-slate-100 hover:bg-slate-800' onClick={() => setMainImages([])}>Clear all images</button>
+          <button className='flex-1 rounded-lg border border-slate-600 bg-slate-900 px-3 py-2 text-sm text-slate-100 hover:bg-slate-800' onClick={() => setSettings(initial)}>Reset settings</button>
         </div>
         <WatermarkControls settings={settings} setSettings={setSettings} />
-        {settings.mode === 'image' && !watermarkSrc && <p className='text-sm text-red-600'>Please upload a watermark image for image mode.</p>}
-        {!!error && <p className='text-sm text-red-600'>{error}</p>}
+        {settings.mode === 'image' && !watermarkSrc && <p className='text-sm text-red-400'>Please upload a watermark image for image mode.</p>}
+        {!!error && <p className='text-sm text-red-400'>{error}</p>}
         <ExportActions canExport={canExport && canRenderWatermark} onExportAll={() => mainImages.forEach((_, idx) => exportOne(idx))} />
       </section>
       <section>
