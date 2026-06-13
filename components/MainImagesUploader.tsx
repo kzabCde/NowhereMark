@@ -1,8 +1,38 @@
 import { UploadDropzone } from '@/components/UploadDropzone';
+import { MAX_MAIN_IMAGES } from '@/lib/file-utils';
 
-export function MainImagesUploader({ onFiles, count, remaining }: { onFiles: (files: FileList | null) => void; count: number; remaining: number; }) {
-  return <div className='space-y-2 rounded-xl border border-slate-700 bg-slate-900/80 p-4 shadow-[0_10px_30px_rgba(0,0,0,0.4)]'>
-    <UploadDropzone label='Main images' helper='Drag & drop images here, or click to browse' accept='.jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp' multiple onFiles={onFiles} />
-    <p className='text-xs text-slate-300'>{count} / 9 images selected • {remaining} remaining</p>
-  </div>;
+export function MainImagesUploader({
+  onFiles,
+  count,
+  remaining,
+}: {
+  onFiles: (files: FileList | null) => void;
+  count: number;
+  remaining: number;
+}) {
+  return (
+    <div className="space-y-2">
+      <UploadDropzone
+        label=""
+        helper={count === 0 ? 'Drag & drop images here, or click to browse' : `Add more images (${remaining} remaining)`}
+        accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+        multiple
+        onFiles={onFiles}
+        disabled={remaining === 0}
+      />
+      {count > 0 && (
+        <div className="flex items-center gap-2">
+          <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-700">
+            <div
+              className="h-full rounded-full bg-indigo-500 transition-all duration-300"
+              style={{ width: `${(count / MAX_MAIN_IMAGES) * 100}%` }}
+            />
+          </div>
+          <span className="shrink-0 text-xs text-slate-400">
+            {count} / {MAX_MAIN_IMAGES}
+          </span>
+        </div>
+      )}
+    </div>
+  );
 }
