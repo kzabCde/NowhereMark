@@ -23,6 +23,7 @@
     "predeploy": "npm run verify && npm run check:audit"
   },
   "dependencies": {
+    "@imgly/background-removal": "^1.7.0",
     "lucide-react": "^0.552.0",
     "next": "^16.0.3",
     "react": "^19.2.0",
