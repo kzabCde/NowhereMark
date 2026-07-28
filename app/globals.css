@@ -14,6 +14,27 @@ body {
     linear-gradient(180deg, #06080c 0%, #090d14 100%);
 }
 
+button,
+a,
+input,
+select {
+  @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400/80 focus-visible:ring-offset-2 focus-visible:ring-offset-[#06080c];
+}
+
+.hero-grid {
+  background-image:
+    linear-gradient(rgba(148, 163, 184, 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.055) 1px, transparent 1px);
+  background-size: 46px 46px;
+  mask-image: linear-gradient(to bottom, black, transparent 88%);
+}
+
+.image-demo {
+  background:
+    radial-gradient(circle at 70% 20%, rgba(34, 211, 238, 0.18), transparent 35%),
+    linear-gradient(145deg, #111827, #020617);
+}
+
 /* Checkered pattern to indicate transparent background */
 .bg-checkered {
   background-image:

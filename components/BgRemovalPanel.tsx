@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Download, Eraser, Loader2, X, Undo2, AlertCircle, ImagePlus, Wand2 } from 'lucide-react';
 import { UploadDropzone } from '@/components/UploadDropzone';
 import { MAX_MAIN_IMAGES, getExportFilename, isValidSourceImageType } from '@/lib/file-utils';
@@ -19,6 +19,18 @@ type BgImageItem = {
 export function BgRemovalPanel() {
   const [images, setImages] = useState<BgImageItem[]>([]);
   const [error, setError] = useState('');
+  const imagesRef = useRef(images);
+
+  useEffect(() => {
+    imagesRef.current = images;
+  }, [images]);
+
+  useEffect(() => () => {
+    imagesRef.current.forEach((image) => {
+      URL.revokeObjectURL(image.src);
+      if (image.bgRemovedSrc) URL.revokeObjectURL(image.bgRemovedSrc);
+    });
+  }, []);
 
   const onFiles = (files: FileList | null) => {
     if (!files) return;
@@ -75,15 +87,37 @@ export function BgRemovalPanel() {
     }
   };
 
-  const exportOne = (item: BgImageItem) => {
+  const exportOne = (item: BgImageItem, index?: number) => {
     const src = item.bgRemovedSrc ?? item.src;
     const a = document.createElement('a');
     a.href = src;
-    a.download = getExportFilename();
+    a.download = item.bgRemovedSrc ? getExportFilename(index) : item.name;
     a.click();
   };
 
-  const exportAll = () => images.forEach((img) => exportOne(img));
+  const processedImages = images.filter((image) => image.bgRemovedSrc);
+  const exportAll = () => processedImages.forEach((image, index) => exportOne(image, index + 1));
+
+  const clearAll = () => {
+    setImages((current) => {
+      current.forEach((image) => {
+        URL.revokeObjectURL(image.src);
+        if (image.bgRemovedSrc) URL.revokeObjectURL(image.bgRemovedSrc);
+      });
+      return [];
+    });
+  };
+
+  const removeImage = (id: string) => {
+    setImages((current) => {
+      const target = current.find((image) => image.id === id);
+      if (target) {
+        URL.revokeObjectURL(target.src);
+        if (target.bgRemovedSrc) URL.revokeObjectURL(target.bgRemovedSrc);
+      }
+      return current.filter((image) => image.id !== id);
+    });
+  };
 
   const anyProcessed = images.some((m) => !!m.bgRemovedSrc);
   const anyPending = images.some((m) => !m.bgRemovedSrc && !m.bgRemoving);
@@ -128,7 +162,7 @@ export function BgRemovalPanel() {
           )}
           {images.length > 0 && (
             <button
-              onClick={() => setImages([])}
+              onClick={clearAll}
               className="mt-2 w-full rounded-md border border-slate-700 px-3 py-1.5 text-xs text-slate-400 transition hover:border-red-500/60 hover:text-red-400"
             >
               Clear all
@@ -169,7 +203,7 @@ export function BgRemovalPanel() {
               className="flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-40"
             >
               <Download className="h-4 w-4" />
-              Export all (PNG)
+              Export processed ({processedImages.length})
             </button>
             {!anyProcessed && (
               <p className="mt-1.5 text-center text-[10px] text-slate-500">
@@ -192,7 +226,7 @@ export function BgRemovalPanel() {
                 item={item}
                 onRemoveBg={() => removeBg(item.id)}
                 onUndoBg={() => undoBg(item.id)}
-                onRemove={() => setImages((prev) => prev.filter((p) => p.id !== item.id))}
+                onRemove={() => removeImage(item.id)}
                 onExport={() => exportOne(item)}
               />
             ))}

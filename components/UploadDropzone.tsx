@@ -22,7 +22,7 @@ export function UploadDropzone({ label, helper, accept, multiple, onFiles, disab
     <div
       role='button'
       tabIndex={disabled ? -1 : 0}
-      aria-label={label}
+      aria-label={label || helper}
       onClick={() => !disabled && inputRef.current?.click()}
       onKeyDown={(e: KeyboardEvent<HTMLDivElement>) => {
         if (!disabled && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); inputRef.current?.click(); }
