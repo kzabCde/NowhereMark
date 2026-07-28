@@ -233,8 +233,14 @@ function Toggle({
 }) {
   return (
     <label className="flex cursor-pointer items-center gap-2 text-xs text-slate-300 select-none">
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(event) => onChange(event.target.checked)}
+        className="sr-only"
+      />
       <span
-        onClick={() => onChange(!checked)}
+        aria-hidden="true"
         className={`relative inline-flex h-4 w-7 items-center rounded-full transition ${
           checked ? 'bg-indigo-500' : 'bg-slate-600'
         }`}

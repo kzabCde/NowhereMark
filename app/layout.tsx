@@ -1,15 +1,21 @@
 import './globals.css';
 import type { Metadata } from 'next';
+import { LanguageProvider } from '@/components/LanguageProvider';
 
 export const metadata: Metadata = {
-  title: 'Nowhere Mark',
-  description: 'Add your mark. Protect your image.'
+  title: {
+    default: 'Nowhere Mark — Private Image Studio',
+    template: '%s · Nowhere Mark',
+  },
+  description: 'Resize, crop, adjust, remove backgrounds and watermark images privately in your browser.',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body>{children}</body>
+    <html lang="th">
+      <body>
+        <LanguageProvider>{children}</LanguageProvider>
+      </body>
     </html>
   );
 }

@@ -1,4 +1,5 @@
 import type { WatermarkSettings } from '@/types/watermark';
+import { clampCenter, trackedTextWidth } from '@/lib/image-math';
 
 type RenderInput = {
   sourceImage: CanvasImageSource;
@@ -56,8 +57,16 @@ export function renderWatermarkedCanvas({ sourceImage, sourceWidth, sourceHeight
 
   const wmW = (settings.widthPercent / 100) * canvas.width;
   const wmH = watermarkImage ? wmW * (((watermarkImage as HTMLImageElement).naturalHeight / (watermarkImage as HTMLImageElement).naturalWidth) || 1) : settings.fontSize * 1.5;
-  const x = (settings.xPercent / 100) * canvas.width;
-  const y = (settings.yPercent / 100) * canvas.height;
+  ctx.font = `${settings.textItalic ? 'italic ' : ''}${settings.textBold ? '700 ' : '400 '}${settings.fontSize}px Inter, Arial, sans-serif`;
+  const characters = Array.from(settings.text);
+  const characterWidths = characters.map((character) => ctx.measureText(character).width);
+  const textWidth = trackedTextWidth(characterWidths, settings.letterSpacing);
+  const contentWidth = settings.mode === 'text' ? textWidth : Math.max(wmW, textWidth);
+  const contentHeight = settings.mode === 'hybrid' ? wmH + settings.fontSize * 1.5 : wmH;
+  const requestedX = (settings.xPercent / 100) * canvas.width;
+  const requestedY = (settings.yPercent / 100) * canvas.height;
+  const x = clampCenter(requestedX, contentWidth, canvas.width);
+  const y = clampCenter(requestedY, contentHeight, canvas.height);
 
   ctx.save();
   ctx.globalAlpha = settings.opacity;
@@ -77,11 +86,12 @@ export function renderWatermarkedCanvas({ sourceImage, sourceWidth, sourceHeight
     ctx.scale(settings.flipX ? -1 : 1, settings.flipY ? -1 : 1);
 
     if ((settings.mode === 'image' || settings.mode === 'hybrid') && watermarkImage) {
-      ctx.drawImage(watermarkImage, -wmW / 2, -wmH / 2, wmW, wmH);
+      const imageOffsetY = settings.mode === 'hybrid' ? -settings.fontSize * 0.35 : 0;
+      ctx.drawImage(watermarkImage, -wmW / 2, -wmH / 2 + imageOffsetY, wmW, wmH);
       if (settings.stroke) {
         ctx.strokeStyle = settings.strokeColor;
         ctx.lineWidth = settings.strokeWidth;
-        ctx.strokeRect(-wmW / 2, -wmH / 2, wmW, wmH);
+        ctx.strokeRect(-wmW / 2, -wmH / 2 + imageOffsetY, wmW, wmH);
       }
     }
     if (settings.mode === 'text' || settings.mode === 'hybrid') {
@@ -89,25 +99,27 @@ export function renderWatermarkedCanvas({ sourceImage, sourceWidth, sourceHeight
       ctx.fillStyle = settings.textColor;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      const chars = settings.text.split('');
-      let cx = 0;
-      for (const ch of chars) {
-        const w = ctx.measureText(ch).width;
+      const textOffsetY = settings.mode === 'hybrid' ? wmH / 2 + settings.fontSize * 0.45 : 0;
+      let cursor = -textWidth / 2;
+      for (let index = 0; index < characters.length; index += 1) {
+        const character = characters[index];
+        const width = characterWidths[index];
+        const center = cursor + width / 2;
         if (settings.stroke) {
           ctx.strokeStyle = settings.textStrokeColor;
           ctx.lineWidth = settings.strokeWidth;
-          ctx.strokeText(ch, cx, 0);
+          ctx.strokeText(character, center, textOffsetY);
         }
-        ctx.fillText(ch, cx, 0);
-        cx += w + settings.letterSpacing;
+        ctx.fillText(character, center, textOffsetY);
+        cursor += width + settings.letterSpacing;
       }
     }
     ctx.restore();
   };
 
   if (settings.repeat) {
-    const stepX = Math.max(80, wmW * 1.6);
-    const stepY = Math.max(80, wmH * 1.6);
+    const stepX = Math.max(80, contentWidth * 1.4);
+    const stepY = Math.max(80, contentHeight * 1.4);
     for (let ty = -stepY; ty < canvas.height + stepY; ty += stepY) {
       for (let tx = -stepX; tx < canvas.width + stepX; tx += stepX) {
         drawAt(tx, ty);

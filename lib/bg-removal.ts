@@ -9,6 +9,16 @@ export async function removeBgFromUrl(
   imageSrc: string,
   onProgress?: (p: BgRemovalProgress) => void,
 ): Promise<string> {
+  const response = await fetch(imageSrc);
+  const blob = await response.blob();
+  const resultBlob = await removeBgFromBlob(blob, onProgress);
+  return URL.createObjectURL(resultBlob);
+}
+
+export async function removeBgFromBlob(
+  blob: Blob,
+  onProgress?: (p: BgRemovalProgress) => void,
+): Promise<Blob> {
   const { removeBackground } = await import('@imgly/background-removal');
 
   const config: Config = {
@@ -25,9 +35,7 @@ export async function removeBgFromUrl(
     },
   };
 
-  const response = await fetch(imageSrc);
-  const blob = await response.blob();
   const resultBlob = await removeBackground(blob, config);
   onProgress?.({ phase: 'done', percent: 100 });
-  return URL.createObjectURL(resultBlob);
+  return resultBlob;
 }

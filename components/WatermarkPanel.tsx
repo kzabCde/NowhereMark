@@ -62,8 +62,19 @@ export function WatermarkPanel() {
   const [settings, setSettings] = useState<WatermarkSettings>(initial);
   const [error, setError] = useState('');
   const renderGenRef = useRef(0);
+  const imagesRef = useRef(images);
+  const watermarkSrcRef = useRef<string | undefined>(undefined);
 
   const canRender = settings.mode !== 'image' || !!watermarkSrc;
+
+  useEffect(() => {
+    imagesRef.current = images;
+  }, [images]);
+
+  useEffect(() => () => {
+    imagesRef.current.forEach((image) => URL.revokeObjectURL(image.src));
+    if (watermarkSrcRef.current) URL.revokeObjectURL(watermarkSrcRef.current);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -131,8 +142,26 @@ export function WatermarkPanel() {
     if (!f) return;
     if (!isValidWatermarkImageType(f)) return setError('Unsupported watermark file type.');
     setError('');
+    if (watermarkSrcRef.current) URL.revokeObjectURL(watermarkSrcRef.current);
+    const url = URL.createObjectURL(f);
+    watermarkSrcRef.current = url;
     setWatermarkName(f.name);
-    setWatermarkSrc(URL.createObjectURL(f));
+    setWatermarkSrc(url);
+  };
+
+  const clearImages = () => {
+    setImages((current) => {
+      current.forEach((image) => URL.revokeObjectURL(image.src));
+      return [];
+    });
+  };
+
+  const removeImage = (id: string) => {
+    setImages((current) => {
+      const target = current.find((image) => image.id === id);
+      if (target) URL.revokeObjectURL(target.src);
+      return current.filter((image) => image.id !== id);
+    });
   };
 
   const exportOne = (idx: number) => {
@@ -166,7 +195,7 @@ export function WatermarkPanel() {
           />
           {images.length > 0 && (
             <button
-              onClick={() => setImages([])}
+              onClick={clearImages}
               className="mt-1 w-full rounded-md border border-slate-700 px-3 py-1.5 text-xs text-slate-400 transition hover:border-red-500/60 hover:text-red-400"
             >
               Clear all images
@@ -206,7 +235,7 @@ export function WatermarkPanel() {
         <WatermarkPreviewGrid
           items={images}
           onExport={exportOne}
-          onRemove={(id) => setImages((prev) => prev.filter((p) => p.id !== id))}
+          onRemove={removeImage}
         />
       </section>
     </div>
